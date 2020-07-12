@@ -22,12 +22,15 @@ import com.template.nanamare.utils.decoration.GridSpacingItemDecoration
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class MovieCategoryFragment(private val genre: GenrePresentation? = null) :
+class MovieCategoryFragment :
     BaseFragment<MovieCategoryFragmentBinding>(R.layout.movie_category_fragment), BaseNavigator {
 
     private val movieCategoryViewModel by viewModel<MovieCategoryViewModel> {
         parametersOf(this)
     }
+
+    private val genre by lazy { arguments?.getParcelable<GenrePresentation>(KEY_GENRE_PRESENTATION) }
+
     private val column by lazy { resources.getInteger(R.integer.grid_column) }
     private val space by lazy { resources.getDimension(R.dimen.grid_space).toInt() }
 
@@ -81,6 +84,15 @@ class MovieCategoryFragment(private val genre: GenrePresentation? = null) :
         super.closeSearchView()
         genre?.let {
             movieCategoryViewModel.requestDiscoverMovies(it.id, RequestMovieApiType.DISCOVER)
+        }
+    }
+
+    companion object {
+        const val KEY_GENRE_PRESENTATION = "KEY_GENRE_PRESENTATION"
+        fun getInstance(genre: GenrePresentation) = MovieCategoryFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(KEY_GENRE_PRESENTATION, genre)
+            }
         }
     }
 

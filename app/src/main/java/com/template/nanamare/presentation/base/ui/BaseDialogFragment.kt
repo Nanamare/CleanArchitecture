@@ -10,16 +10,22 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.template.nanamare.ext.transact
 import com.template.nanamare.presentation.base.navigator.BaseNavigator
 
 
-abstract class BaseDialogFragment<B : ViewDataBinding>(@LayoutRes private val layoutId: Int)
-    : DialogFragment(), BaseNavigator {
+abstract class BaseDialogFragment<B : ViewDataBinding>(@LayoutRes private val layoutId: Int) :
+    DialogFragment(), BaseNavigator {
 
     lateinit var binding: B
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = DataBindingUtil.inflate(inflater, layoutId, container, false)
         binding.lifecycleOwner = this
         return binding.root
@@ -63,9 +69,14 @@ abstract class BaseDialogFragment<B : ViewDataBinding>(@LayoutRes private val la
     }
 
     override fun show(manager: FragmentManager, tag: String?) {
-        manager.beginTransaction().let {
-            it.add(this, tag)
-            it.commitAllowingStateLoss()
+        manager.transact {
+            add(this@BaseDialogFragment, tag)
+        }
+    }
+
+    fun show(manager: FragmentManager, clazz: Class<out Fragment>, args: Bundle, tag: String?) {
+        manager.transact {
+            add(clazz, args, tag)
         }
     }
 
@@ -80,7 +91,7 @@ abstract class BaseDialogFragment<B : ViewDataBinding>(@LayoutRes private val la
     }
 
     override fun errorHandling(errorCode: String) {
-        if(isAdded) {
+        if (isAdded) {
             (activity as? BaseActivity<*>)?.errorHandling(errorCode)
         }
     }

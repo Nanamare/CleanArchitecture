@@ -1,13 +1,18 @@
 package com.template.nanamare.ext
 
 
+import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
-fun AppCompatActivity.replaceFragmentInActivity(fragment: Fragment, frameId: Int) {
+fun AppCompatActivity.replaceFragmentInActivity(
+    fragmentClazz: Class<out Fragment>,
+    frameId: Int,
+    args: Bundle
+) {
     supportFragmentManager.transact {
-        replace(frameId, fragment)
+        replace(frameId, fragmentClazz, args, "$fragmentClazz")
     }
 }
 

@@ -10,6 +10,7 @@ import com.template.nanamare.data.network.NetworkState
 import com.template.nanamare.databinding.MainActivityBinding
 import com.template.nanamare.domain.model.GenreModel
 import com.template.nanamare.ext.replaceFragmentInActivity
+import com.template.nanamare.ext.toJsonString
 import com.template.nanamare.presentation.base.ui.BaseActivity
 import com.template.nanamare.presentation.fragment.MovieFragment
 import com.template.nanamare.presentation.mapper.GenrePresentationMapper
@@ -39,7 +40,9 @@ class MainActivity : BaseActivity<MainActivityBinding>(R.layout.main_activity) {
                     is NetworkState.Init -> hideLoadingPopup()
                     is NetworkState.Loading -> showLoadingPopup()
                     is NetworkState.Success<List<GenreModel>> ->
-                        replaceFragmentInActivity(MovieFragment(it.item.map(GenrePresentationMapper::mapToPresentation)), R.id.flContent)
+                        replaceFragmentInActivity(MovieFragment::class.java, R.id.flContent, Bundle().apply {
+                            putString(KEY_GENE, it.item.map(GenrePresentationMapper::mapToPresentation).toJsonString())
+                        })
                     is NetworkState.Error -> showToast(it.throwable.toString())
                     is NetworkState.ServerError -> showToast(it.toString())
                 }
@@ -64,5 +67,9 @@ class MainActivity : BaseActivity<MainActivityBinding>(R.layout.main_activity) {
                 )
             )
         }
+    }
+
+    companion object {
+        const val KEY_GENE = "KEY_GENE"
     }
 }

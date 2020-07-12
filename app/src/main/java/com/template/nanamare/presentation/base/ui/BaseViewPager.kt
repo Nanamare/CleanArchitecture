@@ -25,5 +25,4 @@ class BaseViewPager(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RES
         return fragmentList[position].second
     }
 
-
 }

@@ -6,18 +6,18 @@ import androidx.lifecycle.Observer
 import com.template.nanamare.BR
 import com.template.nanamare.BuildConfig.VIDEO_URL
 import com.template.nanamare.R
-import com.template.nanamare.presentation.base.ui.BaseActivity
-import com.template.nanamare.presentation.base.ui.SimpleRecyclerView
-import com.template.nanamare.presentation.model.ActorPresentation
+import com.template.nanamare.data.network.NetworkState
 import com.template.nanamare.databinding.ItemActorBinding
 import com.template.nanamare.databinding.MovieInfoActivityBinding
-import com.template.nanamare.data.network.NetworkState
 import com.template.nanamare.domain.model.CreditModel
 import com.template.nanamare.domain.model.VideoModel
 import com.template.nanamare.presentation.anim.SimpleAnimation
+import com.template.nanamare.presentation.base.ui.BaseActivity
+import com.template.nanamare.presentation.base.ui.SimpleRecyclerView
 import com.template.nanamare.presentation.dialog.VideoFragment
 import com.template.nanamare.presentation.mapper.ActorPresentationMapper
 import com.template.nanamare.presentation.mapper.ResultPresentationMapper
+import com.template.nanamare.presentation.model.ActorPresentation
 import com.template.nanamare.presentation.vm.MovieInfoViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
@@ -28,7 +28,10 @@ class MovieInfoActivity : BaseActivity<MovieInfoActivityBinding>(R.layout.movie_
 
     private val actorSimpleAdapter by lazy {
         object :
-            SimpleRecyclerView.Adapter<ActorPresentation, ItemActorBinding>(R.layout.item_actor, BR.actor) {
+            SimpleRecyclerView.Adapter<ActorPresentation, ItemActorBinding>(
+                R.layout.item_actor,
+                BR.actor
+            ) {
         }
     }
 
@@ -71,7 +74,8 @@ class MovieInfoActivity : BaseActivity<MovieInfoActivityBinding>(R.layout.movie_
     }
 
     private fun initActorAdapter(creditModel: CreditModel) {
-        movieInfoViewModel.liveActor.value = creditModel.cast.map(ActorPresentationMapper::mapToPresentation)
+        movieInfoViewModel.liveActor.value =
+            creditModel.cast.map(ActorPresentationMapper::mapToPresentation)
     }
 
     private fun getUrl(it: NetworkState.Success<VideoModel>) {
@@ -79,7 +83,19 @@ class MovieInfoActivity : BaseActivity<MovieInfoActivityBinding>(R.layout.movie_
             .asSequence()
             .filter { "YouTube".toLowerCase(Locale.getDefault()) == it.site.toLowerCase(Locale.getDefault()) }
             .reduce { acc, result -> if (acc.size > result.size) acc else result }.let {
-                VideoFragment(Uri.parse(VIDEO_URL).buildUpon().appendQueryParameter("v", it.key).build().toString()).show(supportFragmentManager, VideoFragment::class.simpleName)
+                VideoFragment().show(
+                    supportFragmentManager,
+                    VideoFragment::class.java,
+                    Bundle().apply {
+                        putString(
+                            VideoFragment.KEY_VIDEO_URL,
+                            Uri.parse(VIDEO_URL).buildUpon().appendQueryParameter("v", it.key)
+                                .build()
+                                .toString()
+                        )
+                    },
+                    VideoFragment::class.simpleName
+                )
             }
     }
 
